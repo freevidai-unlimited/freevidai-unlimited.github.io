@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VideoAI Studio — Free AI Video Generator</title>
+<title>Free AI Video Generator — Text to Video & Image to Video AI Online, No Watermark, No Sign Up | FreeVidAI</title>
+<meta name="description" content="FreeVidAI is a free AI video generator online. Create text to video and image to video AI clips, plus talking avatar videos. No watermark, no sign up, free download.">
+<meta name="keywords" content="free ai video generator, ai video generator, ai video generator free, text to video ai free, image to video ai free, free ai video generator without watermark, ai video generator no sign up, ai video maker">
 <meta name="description" content="Turn text, images and photos into videos with AI. Text-to-video, image-to-video and avatar videos — free to start.">
 <style>
   :root{
@@ -116,13 +118,16 @@
   .foot-in{display:flex;gap:20px;flex-wrap:wrap;align-items:center;justify-content:space-between}
   footer .cols{display:flex;gap:26px}
   footer a:hover{color:var(--txt)}
+.dl-bar{margin-top:10px;text-align:center}
+.dl-btn{background:linear-gradient(135deg,#22c55e,#16a34a);border:none;color:#fff;font-size:14.5px;font-weight:700;padding:10px 22px;border-radius:10px;cursor:pointer;box-shadow:0 6px 18px rgba(34,197,94,.35)}
+.dl-btn:active{transform:scale(.97)}
 </style>
 </head>
 <body>
 
 <nav>
   <div class="wrap nav-in">
-    <a class="logo" href="#"><div class="logo-badge">▶</div>VideoAI&nbsp;<span>Studio</span></a>
+    <a class="logo" href="#"><div class="logo-badge">▶</div>FreeVid<span>AI</span></a>
     <div class="nav-links">
       <a href="#text-to-video">Text to Video</a>
       <a href="#image-to-video">Image to Video</a>
@@ -142,7 +147,7 @@
   <header class="hero">
     <div class="hero-tag">Free AI Video Generator</div>
     <h1>Turn words into <span class="g">videos</span>.<br>Turn photos into <span class="g">stories</span>.</h1>
-    <p>Describe a scene, upload a photo, or create a talking avatar — VideoAI Studio turns your ideas into share-ready video content, right in your browser.</p>
+    <p>Describe a scene, upload a photo, or create a talking avatar — FreeVidAI turns your ideas into share-ready video content, right in your browser.</p>
     <div class="hero-cta">
       <a href="#text-to-video"><button class="btn-grad" style="padding:13px 26px;font-size:15.5px">Create a Video</button></a>
       <a href="#avatar-video"><button class="btn-ghost">Try Avatar Video</button></a>
@@ -240,7 +245,7 @@
           </div>
           <div>
             <label class="flabel" for="av-script">Script — what should the avatar say?</label>
-            <textarea id="av-script" rows="6">Hi, I am your AI avatar. Welcome to VideoAI Studio, where your words turn into video.</textarea>
+            <textarea id="av-script" rows="6">Hi, I am your AI avatar. Welcome to FreeVidAI, where your words turn into video.</textarea>
             <label class="flabel">Voice</label>
             <select id="av-voice"></select>
             <button class="gen-btn" id="av-play">🔊 Play Voice Preview</button>
@@ -271,12 +276,12 @@
 
 <footer>
   <div class="wrap foot-in">
-    <div class="logo" style="font-size:17px"><div class="logo-badge" style="width:28px;height:28px;font-size:14px">▶</div>VideoAI&nbsp;<span>Studio</span></div>
+    <div class="logo" style="font-size:17px"><div class="logo-badge" style="width:28px;height:28px;font-size:14px">▶</div>FreeVid<span>AI</span></div>
     <div class="cols">
       <a href="#text-to-video">Text to Video</a><a href="#image-to-video">Image to Video</a>
       <a href="#avatar-video">Avatar Video</a><a href="#examples">Examples</a>
     </div>
-    <div>© 2026 VideoAI Studio · Image &amp; voice engines live · Video engine in Phase 2</div>
+    <div>© 2026 FreeVidAI · Image &amp; voice engines live · Video engine in Phase 2</div>
   </div>
 </footer>
 
@@ -288,8 +293,18 @@ const polli = (prompt,w,h) => "https://image.pollinations.ai/prompt/" + encodeUR
 function showLoading(box, txt){
   box.innerHTML = '<div class="loading-box"><div class="spin"></div>' + txt + '</div>';
 }
+async function downloadURL(url, name){
+  try{ const r = await fetch(url); const b = await r.blob();
+    const o = URL.createObjectURL(b); const a = document.createElement('a');
+    a.href = o; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(o), 4000);
+  }catch(e){ window.open(url, '_blank'); }
+}
 function showFrame(box, src, tag){
-  box.innerHTML = '<img src="' + src + '" alt="Generated frame"><div class="frame-tag">' + tag + '</div>';
+  box.innerHTML = '<img src="' + src + '" alt="Generated frame"><div class="frame-tag">' + tag + '</div><div class="dl-bar"><button class="dl-btn">\u2B07 Download</button></div>';
+  box.querySelector('.dl-btn').onclick = ()=> downloadURL(src, 'freevidai-image.jpg');
+  const im = box.querySelector('img'), tg = box.querySelector('.frame-tag');
+  im.onload = ()=>{ if(tg) tg.textContent = tag + ' \u00B7 ' + im.naturalWidth + '\u00D7' + im.naturalHeight; };
   const img = box.querySelector('img');
   img.onerror = () => { box.innerHTML = '<div class="empty"><span class="big">⚠️</span>The image engine is busy right now.<br>Please press Generate again in a few seconds.</div>'; };
 }
@@ -307,7 +322,7 @@ $('#t2v-btn').onclick = ()=>{
   const box = $('#t2v-result'), btn = $('#t2v-btn');
   btn.disabled = true; btn.textContent = "⏳ Generating preview frame…";
   showLoading(box, "Rendering your scene’s preview frame…");
-  const url = polli(prompt + ", " + style + " style, ultra detailed, cinematic lighting", ratio.w, ratio.h);
+  const url = polli(prompt + ", " + style + " style, ultra detailed, cinematic lighting", ratio.w*2, ratio.h*2);
   const pre = new Image();
   pre.onload = ()=>{ showFrame(box, url, "Preview frame · Motion engine: Phase 2");
     $('#t2v-note').classList.remove('hidden'); btn.disabled=false; btn.textContent="✨ Generate"; };
@@ -338,7 +353,7 @@ $('#i2v-btn').onclick = ()=>{
 
 /* ---------- Avatar Video ---------- */
 const avDrop = $('#av-drop');
-avDrop.onclick = e=>{ if(e.target.id !== 'av-gen') $('#av-file').click(); };
+avDrop.onclick = e=>{ if(e.target.id !== 'av-gen' && e.target.id !== 'av-dl') $('#av-file').click(); };
 $('#av-file').onchange = e=>{
   if(!e.target.files[0]) return;
   const r = new FileReader();
@@ -349,7 +364,7 @@ $('#av-gen').onclick = e=>{
   e.stopPropagation();
   const d = $('#av-desc').value.trim() || "Professional AI presenter portrait, studio lighting, photorealistic";
   const img = $('#av-img'); img.style.opacity = .35;
-  const url = polli("Portrait headshot of " + d, 512, 512);
+  const url = polli("Portrait headshot of " + d, 2048, 2048);
   const pre = new Image();
   pre.onload = ()=>{ img.src = url; img.style.opacity = 1; };
   pre.onerror = ()=>{ img.style.opacity = 1; alert("Image engine is busy — please try again."); };
@@ -379,6 +394,10 @@ $('#av-play').onclick = ()=>{
   u.onend = u.onerror = ()=> img.classList.remove('talking');
   speechSynthesis.speak(u);
 };
+/* Avatar photo download */
+(function(){ const b = document.createElement('button'); b.id='av-dl'; b.className='dl-btn'; b.textContent = '\u2B07 Download Photo';
+  b.style.marginTop='10px'; b.onclick = e=>{ e.stopPropagation(); downloadURL($('#av-img').src, 'freevidai-avatar.jpg'); };
+  const img = $('#av-img'); img.parentElement.appendChild(b); })();
 </script>
 </body>
 </html>
