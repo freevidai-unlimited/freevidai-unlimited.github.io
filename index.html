@@ -129,6 +129,7 @@
   <div class="wrap nav-in">
     <a class="logo" href="#"><div class="logo-badge">▶</div>FreeVid<span>AI</span></a>
     <div class="nav-links">
+      <a href="#text-to-image">Text to Image</a>
       <a href="#text-to-video">Text to Video</a>
       <a href="#image-to-video">Image to Video</a>
       <a href="#avatar-video">Avatar Video</a>
@@ -162,7 +163,7 @@
       <a href="#avatar-video"><button class="btn-ghost">Try Avatar Video</button></a>
     </div>
     <div class="hero-stats">
-      <div><b>3</b><span>AI creation tools</span></div>
+      <div><b>4</b><span>AI creation tools</span></div>
       <div><b>9:16 · 16:9 · 1:1</b><span>Every format you need</span></div>
       <div><b>Free</b><span>To start creating</span></div>
       <div><b>No install</b><span>Works in the browser</span></div>
@@ -171,6 +172,42 @@
 
   <div class="layout">
     <main>
+      <!-- ============ TEXT TO IMAGE ============ -->
+      <section class="tool" id="text-to-image">
+        <div class="tool-head">
+          <div class="tool-ico">🎨</div>
+          <div>
+            <h2>Text to Image</h2>
+            <p class="sub">Describe any picture in words and get a high-quality AI image with a download button.</p>
+          </div>
+          <span class="badge badge-soon">Image engine · Phase 2</span>
+        </div>
+        <label class="flabel" for="t2i-prompt">Your picture</label>
+        <textarea id="t2i-prompt" rows="3" placeholder="Example: A royal Bengal tiger walking through morning mist in a bamboo forest, photorealistic">A royal Bengal tiger walking through morning mist in a bamboo forest, photorealistic</textarea>
+        <div class="row2">
+          <div>
+            <label class="flabel">Size</label>
+            <div class="seg" id="t2i-ratio">
+              <button data-w="2048" data-h="1152">16:9 Wide</button>
+              <button data-w="1152" data-h="2048" class="on">9:16 Reel</button>
+              <button data-w="1600" data-h="1600">1:1 Square</button>
+            </div>
+          </div>
+          <div>
+            <label class="flabel">Style</label>
+            <select id="t2i-style">
+              <option>Realistic</option><option>Cinematic</option><option>3D Animation</option>
+              <option>Anime</option><option>Digital Art</option>
+            </select>
+          </div>
+        </div>
+        <button class="gen-btn" id="t2i-btn">🎨 Generate Image</button>
+        <div class="result" id="t2i-result">
+          <div class="empty"><span class="big">🖼️</span>Your image will appear here with a Download button.<br>Describe a picture above and press Generate Image.</div>
+        </div>
+        <div class="engine-note hidden" id="t2i-note">⚠️ <span><b>Honest status:</b> the high-quality image engine is being connected with the Phase-2 server — we removed the low-quality engine on purpose and will never pass off weak images as high quality.</span></div>
+      </section>
+
       <!-- ============ TEXT TO VIDEO ============ -->
       <section class="tool" id="text-to-video">
         <div class="tool-head">
@@ -411,6 +448,21 @@ $('#av-play').onclick = ()=>{
 (function(){ const b = document.createElement('button'); b.id='av-dl'; b.className='dl-btn'; b.textContent = '\u2B07 Download Photo';
   b.style.marginTop='10px'; b.onclick = e=>{ e.stopPropagation(); downloadURL($('#av-img').src, 'freevidai-avatar.jpg'); };
   const img = $('#av-img'); img.parentElement.appendChild(b); })();
+</script>
+<script>
+/* ---------- Text to Image ---------- */
+document.querySelectorAll('#t2i-ratio button').forEach(b=>{
+  b.onclick = ()=>{ document.querySelectorAll('#t2i-ratio button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); };
+});
+$('#t2i-btn').onclick = ()=>{
+  const prompt = $('#t2i-prompt').value.trim();
+  if(!prompt) return alert("Please describe your picture first.");
+  const box = $('#t2i-result'), btn = $('#t2i-btn');
+  btn.disabled = true; btn.textContent = "⏳ Preparing your image…";
+  showLoading(box, "Preparing your image…");
+  setTimeout(()=>{ enginePending(box, "image");
+    $('#t2i-note').classList.remove('hidden'); btn.disabled=false; btn.textContent="🎨 Generate Image"; }, 900);
+};
 </script>
 </body>
 </html>
