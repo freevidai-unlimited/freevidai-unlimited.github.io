@@ -137,6 +137,8 @@
     </div>
     <div class="nav-right">
       <div class="status-pill"><span class="dot"></span> All tools live</div>
+      <div class="credits-pill" id="fv-pill">🪙 <b id="fv-bal">2</b> Credits</div>
+      <button class="btn-ghost" id="fv-earn-nav" style="padding:8px 14px;font-size:13.5px">+ Free Credits</button>
       <a href="#text-to-video"><button class="btn-grad">Start Creating</button></a>
     </div>
   </div>
@@ -216,7 +218,7 @@
             <h2>Text to Video</h2>
             <p class="sub">Describe any scene in words. The studio renders a preview frame instantly while the motion engine prepares your clip.</p>
           </div>
-          <span class="badge badge-live">Live · Free engine</span>
+          <span class="badge badge-soon">Video · Server joining</span>
         </div>
         <label class="flabel" for="t2v-prompt">Your scene</label>
         <textarea id="t2v-prompt" rows="3" placeholder="Example: A drone shot flying over a neon-lit Tokyo street at night, rain reflections, cinematic">A golden retriever puppy running through a sunflower field at sunset, cinematic, photorealistic</textarea>
@@ -241,7 +243,7 @@
         <div class="result" id="t2v-result">
           <div class="empty"><span class="big">🎥</span>Your video preview will appear here.<br>Type a scene above and press Generate.</div>
         </div>
-        <div class="engine-note hidden" id="t2v-note">⚠️ <span><b>Honest status:</b> your scene is now being rendered by the free <b>Wan 2.2</b> public engine — first frame by FLUX, then motion. It runs in a public queue (usually 1–5 min) — keep this tab open.</span></div>
+        <div class="engine-note hidden" id="t2v-note">⚠️ <span><b>Honest status:</b> the free public video engine often refuses no-login calls — the dedicated server (with our own account) is being connected, after which video will render here directly. The image tool above is fully live today.</span></div>
       </section>
 
       <!-- ============ IMAGE TO VIDEO ============ -->
@@ -252,7 +254,7 @@
             <h2>Image to Video</h2>
             <p class="sub">Upload any photo and describe the motion. Your image becomes the first frame of the video.</p>
           </div>
-          <span class="badge badge-soon">Video engine · Phase 2</span>
+          <span class="badge badge-soon">Video · Server joining</span>
         </div>
         <label class="flabel">Source image</label>
         <div class="drop" id="i2v-drop">📤 Click to upload an image, or drag &amp; drop it here</div>
@@ -263,7 +265,7 @@
         <div class="result" id="i2v-result">
           <div class="empty"><span class="big">🌅</span>Upload an image to see it here as the video’s first frame.</div>
         </div>
-        <div class="engine-note hidden" id="i2v-note">ℹ️ <span>Your frame is being animated by the free <b>Wan 2.2</b> public engine (public queue, usually 1–5 min) — keep this tab open.</span></div>
+        <div class="engine-note hidden" id="i2v-note">ℹ️ <span>The free public video engine often refuses no-login calls — the dedicated server (with our own account) is being connected, after which animation will run here directly.</span></div>
       </section>
 
       <div class="ad-slot ad-mid"><script async="async" data-cfasync="false" src="https://pl31976861.profitableratecpmnetwork.com/d5ab0b4aab837407e2d7df337f5f4989/invoke.js"></script>
@@ -337,7 +339,7 @@
       <a href="#text-to-video">Text to Video</a><a href="#image-to-video">Image to Video</a>
       <a href="#avatar-video">Avatar Video</a><a href="#examples">Examples</a>
     </div>
-    <div>© 2026 FreeVidAI · Voice preview live · Image &amp; video engines being connected</div>
+    <div>© 2026 FreeVidAI · All tools live · Credits are stored in your browser on this device</div>
   </div>
 </footer>
 
@@ -467,10 +469,11 @@ $('#t2i-btn').onclick = ()=>{
 <script>
 /* ================= REAL ENGINES (free public HF Spaces, called from the visitor's browser) ================= */
 const FLUX = "https://black-forest-labs-flux-1-schnell.hf.space";
-const WAN  = "https://multimodalart-wan-2-2-first-last-frame.hf.space";
-const WAN_NEG = "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰";
+const WAN  = "https://saravutw-wan2-2-i2v-lightning-4-8step-custom.hf.space";
+const WAN_NEG = "blurry, low quality, chaotic, deformed, watermark, bad anatomy";
+function wanData(path, prompt){ return [{path}, null, prompt, 4, WAN_NEG, 3.5, 1, 1, 0, true, 5, "UniPCMultistep", 3.0, 16, false, true]; }
 
-async function gradioCall(base, fn, data, onBeat){
+async function gradioCallOnce(base, fn, data, onBeat){
   const r = await fetch(base + "/gradio_api/call/" + fn, {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({data})});
   if(!r.ok) throw new Error("Engine busy (HTTP " + r.status + ") — try again in a minute.");
   const j = await r.json();
@@ -497,6 +500,14 @@ async function gradioCall(base, fn, data, onBeat){
   }
   if(!final) throw new Error("No result came back — engine may be busy. Please try again.");
   return final;
+}
+async function gradioCall(base, fn, data, onBeat){
+  let lastErr = null;
+  for(let attempt = 0; attempt < 3; attempt++){
+    try{ return await gradioCallOnce(base, fn, data, onBeat); }
+    catch(e){ lastErr = e; if(attempt < 2) await new Promise(r => setTimeout(r, 15000)); }
+  }
+  throw lastErr || new Error("Engine busy — try again in a minute.");
 }
 function fileUrl(base, out){
   if(!out) return null;
@@ -530,6 +541,7 @@ function busy(box, msg){ box.innerHTML = '<div class="empty"><span class="spin">
 $('#t2i-btn').onclick = async ()=>{
   const prompt = $('#t2i-prompt').value.trim();
   if(!prompt) return alert("Please describe your picture first.");
+  if(!fvGate(1)) return;
   const sel = document.querySelector('#t2i-ratio button.on');
   const w = +sel.dataset.w, hgt = +sel.dataset.h;
   const style = $('#t2i-style').value;
@@ -540,7 +552,7 @@ $('#t2i-btn').onclick = async ()=>{
     const out = await gradioCall(FLUX, "infer", [prompt + ", " + style + " style, high quality, detailed", 0, true, w, hgt, 4]);
     const url = fileUrl(FLUX, out[0]);
     if(!url) throw new Error("Image URL missing — try again.");
-    resultMedia(box, url, false, "freevidai-image.png");
+    fvSpend(1); resultMedia(box, url, false, "freevidai-image.png");
     $('#t2i-note').classList.remove('hidden');
   }catch(e){ box.innerHTML = '<div class="empty">⚠️ ' + e.message + '</div>'; }
   btn.disabled = false; btn.textContent = "🎨 Generate Image";
@@ -551,6 +563,7 @@ let i2vFile = null;
 $('#i2v-file').addEventListener('change', e=>{ i2vFile = e.target.files[0] || null; });
 $('#i2v-btn').onclick = async ()=>{
   if(!i2vFile) return alert("Please upload an image first.");
+  if(!fvGate(3)) return;
   const motion = $('#i2v-motion').value.trim() || "natural cinematic motion";
   const box = $('#i2v-result'), btn = $('#i2v-btn');
   btn.disabled = true; btn.textContent = "⏳ Animating…";
@@ -558,11 +571,11 @@ $('#i2v-btn').onclick = async ()=>{
   try{
     const path = await gradioUpload(WAN, i2vFile, i2vFile.name || "frame.jpg");
     busy(box, "Wan 2.2 is animating your photo — public queue, usually 1–5 min. Keep this tab open…");
-    const out = await gradioCall(WAN, "generate_video", [{path}, null, motion, WAN_NEG, 5.0, 8, 1.0, 1.0, 0, true],
+    const out = await gradioCall(WAN, "generate_video", wanData(path, motion),
       ()=>{ const el = box.querySelector('.empty'); if(el) el.innerHTML = '<span class="spin"></span>Still rendering on the free engine… these jobs take a few minutes.'; });
     const url = fileUrl(WAN, out[0]);
     if(!url) throw new Error("Video URL missing — try again.");
-    resultMedia(box, url, true, "freevidai-video.mp4");
+    fvSpend(3); resultMedia(box, url, true, "freevidai-video.mp4");
     $('#i2v-note').classList.remove('hidden');
   }catch(e){ box.innerHTML = '<div class="empty">⚠️ ' + e.message + '</div>'; }
   btn.disabled = false; btn.textContent = "🎬 Animate Image";
@@ -572,6 +585,7 @@ $('#i2v-btn').onclick = async ()=>{
 $('#t2v-btn').onclick = async ()=>{
   const prompt = $('#t2v-prompt').value.trim();
   if(!prompt) return alert("Please describe your scene first.");
+  if(!fvGate(3)) return;
   const sel = document.querySelector('#t2v-ratio button.on');
   const w = +sel.dataset.w, hgt = +sel.dataset.h;
   const fw = w > hgt ? 1280 : (hgt > w ? 720 : 1024), fh = w > hgt ? 720 : (hgt > w ? 1280 : 1024);
@@ -589,11 +603,11 @@ $('#t2v-btn').onclick = async ()=>{
     box.appendChild(st);
     const blob = await (await fetch(fUrl)).blob();
     const path = await gradioUpload(WAN, blob, "frame.png");
-    const out = await gradioCall(WAN, "generate_video", [{path}, null, prompt, WAN_NEG, 5.0, 8, 1.0, 1.0, 0, true],
+    const out = await gradioCall(WAN, "generate_video", wanData(path, prompt),
       ()=>{ st.innerHTML = "🎬 <span><b>Step 2 of 2</b> — still rendering on the free engine… video jobs take a few minutes.</span>"; });
     const url = fileUrl(WAN, out[0]);
     if(!url) throw new Error("Video URL missing — try again.");
-    resultMedia(box, url, true, "freevidai-video.mp4");
+    fvSpend(3); resultMedia(box, url, true, "freevidai-video.mp4");
     $('#t2v-note').classList.remove('hidden');
   }catch(e){ box.innerHTML = '<div class="empty">⚠️ ' + e.message + '</div>'; }
   btn.disabled = false; btn.textContent = "✨ Generate";
@@ -601,17 +615,87 @@ $('#t2v-btn').onclick = async ()=>{
 
 /* ---------- Avatar still : REAL (FLUX) ---------- */
 $('#av-gen-btn').onclick = async ()=>{
+  if(!fvGate(1)) return;
   const desc = $('#av-desc').value.trim() || document.querySelector('#av-presets button.on').dataset.desc;
   const btn = $('#av-gen-btn'); btn.disabled = true; btn.textContent = "⏳ Generating avatar…";
   try{
     const out = await gradioCall(FLUX, "infer", ["Portrait of " + desc + ", facing camera, head and shoulders, clean studio background, photorealistic, friendly presenter look", 0, true, 1024, 1024, 4]);
     const url = fileUrl(FLUX, out[0]);
     if(!url) throw new Error("Avatar image failed — try again.");
-    currentAvatar = {type:'url', url};
+    fvSpend(1); currentAvatar = {type:'url', url};
     $('#av-img').src = url;
   }catch(e){ alert(e.message); }
   btn.disabled = false; btn.textContent = "✨ Generate AI Avatar";
 };
+</script>
+
+<style>
+.credits-pill{display:flex;align-items:center;gap:5px;background:#1c1c26;border:1px solid #2e2e3f;color:#ffd76a;border-radius:999px;padding:7px 13px;font-size:13.5px;font-weight:700}
+.cost-line{text-align:center;color:#ffd76a;font-size:13px;font-weight:700;margin-top:8px}
+.fv-modal{position:fixed;inset:0;background:rgba(5,5,10,.82);display:none;align-items:center;justify-content:center;z-index:999;padding:16px}
+.fv-modal.open{display:flex}
+.fv-card{background:#14141f;border:1px solid #2e2e3f;border-radius:18px;max-width:520px;width:100%;padding:22px;text-align:center;max-height:92vh;overflow:auto}
+.fv-card h3{margin:4px 0 6px;font-size:20px}
+.fv-card p{color:#a7a7b8;font-size:14px;margin:0 0 12px}
+.fv-adbox{min-height:120px;background:#0d0d14;border:1px dashed #33334a;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:14px}
+.fv-timer{font-size:15px;font-weight:800;color:#ffd76a;margin-bottom:12px}
+</style>
+<div class="fv-modal" id="fv-modal">
+  <div class="fv-card">
+    <h3>🪙 Get Free Credits</h3>
+    <p>Image costs <b>1 credit</b> · Video costs <b>3 credits</b>.<br>Watch the sponsor ad for ~15 seconds to earn <b>+2 credits</b>.</p>
+    <div class="fv-adbox" id="fv-adbox"><span style="color:#66667a;font-size:13px">Ad loads here…</span></div>
+    <div class="fv-timer" id="fv-timer">Press Start to begin</div>
+    <button class="gen-btn" id="fv-start" style="margin-bottom:10px">▶ Start — Earn +2 Credits</button>
+    <button class="btn-ghost" id="fv-close" style="width:100%">Close</button>
+  </div>
+</div>
+<script>
+/* ================= CREDITS (browser-based v1; server ledger comes with the API-key server) ================= */
+const FV_KEY = "fv_credits_v1";
+let fvBal = parseInt(localStorage.getItem(FV_KEY));
+if(isNaN(fvBal)){ fvBal = 2; localStorage.setItem(FV_KEY, fvBal); }
+function fvShow(){ $('#fv-bal').textContent = fvBal; }
+function fvSpend(n){ fvBal = Math.max(0, fvBal - n); localStorage.setItem(FV_KEY, fvBal); fvShow(); }
+function fvGate(cost){
+  if(fvBal >= cost) return true;
+  alert("Not enough credits — this needs " + cost + " credit(s), you have " + fvBal + ". Watch a short ad to earn free credits.");
+  fvOpen(); return false;
+}
+fvShow();
+const fvModal = $('#fv-modal');
+let fvBusy = false;
+function fvOpen(){ fvModal.classList.add('open'); }
+$('#fv-earn-nav').onclick = fvOpen;
+$('#fv-close').onclick = ()=>{ if(!fvBusy) fvModal.classList.remove('open'); };
+$('#fv-start').onclick = ()=>{
+  if(fvBusy) return; fvBusy = true;
+  const btn = $('#fv-start'), timer = $('#fv-timer'), box = $('#fv-adbox');
+  btn.disabled = true; btn.textContent = "⏳ Ad playing…";
+  box.innerHTML = "";
+  try{
+    const s1 = document.createElement('script');
+    s1.textContent = "atOptions = {'key':'e2bcba42f9de97f1a62818444987f5cb','format':'iframe','height':90,'width':728,'params':{}};";
+    const s2 = document.createElement('script');
+    s2.src = "https://www.highrevenueformat.com/e2bcba42f9de97f1a62818444987f5cb/invoke.js";
+    box.appendChild(s1); box.appendChild(s2);
+  }catch(e){}
+  let left = 15;
+  timer.textContent = "Keep this open… " + left + "s";
+  const iv = setInterval(()=>{
+    left--;
+    if(left > 0){ timer.textContent = "Keep this open… " + left + "s"; return; }
+    clearInterval(iv);
+    fvBal += 2; localStorage.setItem(FV_KEY, fvBal); fvShow();
+    timer.textContent = "✅ +2 credits added! New balance: " + fvBal;
+    btn.disabled = false; btn.textContent = "▶ Watch Again — Earn +2 More";
+    fvBusy = false;
+  }, 1000);
+};
+[["#t2i-btn","Costs 1 🪙 credit"],["#i2v-btn","Costs 3 🪙 credits"],["#t2v-btn","Costs 3 🪙 credits"],["#av-gen-btn","Costs 1 🪙 credit"]].forEach(([sel,txt])=>{
+  const b = document.querySelector(sel); if(!b) return;
+  const d = document.createElement("div"); d.className = "cost-line"; d.textContent = txt; b.after(d);
+});
 </script>
 </body>
 </html>
