@@ -31,18 +31,18 @@
   .nav-links a{color:var(--muted);font-size:14.5px;font-weight:600}
   .nav-links a:hover{color:var(--txt)}
   .nav-right{margin-left:auto;display:flex;align-items:center;gap:12px}
-  .status-pill{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--muted);border:1px solid var(--line);padding:6px 12px;border-radius:999px;background:var(--card)}
+  .status-pill{display:flex;align-items:center;gap:7px;white-space:nowrap;flex:none;font-size:12.5px;font-weight:600;color:var(--muted);border:1px solid var(--line);padding:6px 12px;border-radius:999px;background:var(--card)}
   .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok)}
   .btn-grad{background:var(--grad);color:#fff;border:none;font-weight:700;font-size:14.5px;padding:10px 20px;border-radius:11px;box-shadow:0 6px 20px rgba(124,92,255,.35)}
   .btn-grad:hover{filter:brightness(1.1)}
-  @media(max-width:760px){.nav-links{display:none}}
+  @media(max-width:760px){.nav-links{display:none}.status-pill{display:none}}
 
   /* ---------- Ad slots ---------- */
   .ad-slot{border:1.5px dashed #33334d;border-radius:12px;background:#0b0b13;color:var(--muted2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center}
   .ad-slot b{font-size:13px;letter-spacing:2.5px;text-transform:uppercase;color:#55556f}
   .ad-slot small{font-size:11.5px}
-  .ad-top{height:96px;margin:18px 0 6px}
-  .ad-side{height:600px;position:sticky;top:84px}
+  .ad-top{min-height:96px;margin:18px 0 6px}
+  .ad-side{min-height:280px;position:sticky;top:84px}
   .ad-mid{height:110px;margin:8px 0}
 
   /* ---------- Hero ---------- */
@@ -135,14 +135,23 @@
       <a href="#examples">Examples</a>
     </div>
     <div class="nav-right">
-      <div class="status-pill"><span class="dot"></span> Image engine live</div>
+      <div class="status-pill"><span class="dot"></span> Voice live · Video soon</div>
       <a href="#text-to-video"><button class="btn-grad">Start Creating</button></a>
     </div>
   </div>
 </nav>
 
 <div class="wrap">
-  <div class="ad-slot ad-top"><b>Ad Space</b><small>Advertisement · 728 × 90</small></div>
+  <div class="ad-slot ad-top"><script>
+  atOptions = {
+    'key' : 'e2bcba42f9de97f1a62818444987f5cb',
+    'format' : 'iframe',
+    'height' : 90,
+    'width' : 728,
+    'params' : {}
+  };
+</script>
+<script src="https://www.highrevenueformat.com/e2bcba42f9de97f1a62818444987f5cb/invoke.js"></script></div>
 
   <header class="hero">
     <div class="hero-tag">Free AI Video Generator</div>
@@ -195,7 +204,7 @@
         <div class="result" id="t2v-result">
           <div class="empty"><span class="big">🎥</span>Your video preview will appear here.<br>Type a scene above and press Generate.</div>
         </div>
-        <div class="engine-note hidden" id="t2v-note">⚠️ <span><b>Honest status:</b> the preview frame above is real and generated live by our image engine. Full motion rendering (Wan / LTX-class video model) is being connected in Phase 2 — we will never show you a fake “video” before it is real.</span></div>
+        <div class="engine-note hidden" id="t2v-note">⚠️ <span><b>Honest status:</b> the video engine (Wan-class model) is being connected in Phase 2 — we will never show you a fake “video” before it is real.</span></div>
       </section>
 
       <!-- ============ IMAGE TO VIDEO ============ -->
@@ -220,7 +229,8 @@
         <div class="engine-note hidden" id="i2v-note">⚠️ <span><b>Honest status:</b> your uploaded frame is ready and stored only in your browser. The image-to-video motion engine connects in Phase 2 — no fake animations, ever.</span></div>
       </section>
 
-      <div class="ad-slot ad-mid"><b>Ad Space</b><small>Advertisement · In-feed</small></div>
+      <div class="ad-slot ad-mid"><script async="async" data-cfasync="false" src="https://pl31976861.profitableratecpmnetwork.com/d5ab0b4aab837407e2d7df337f5f4989/invoke.js"></script>
+<div id="container-d5ab0b4aab837407e2d7df337f5f4989"></div></div>
 
       <!-- ============ AVATAR VIDEO ============ -->
       <section class="tool" id="avatar-video">
@@ -269,7 +279,16 @@
     </main>
 
     <aside>
-      <div class="ad-slot ad-side"><b>Ad Space</b><small>Advertisement · 300 × 600</small></div>
+      <div class="ad-slot ad-side"><script>
+  atOptions = {
+    'key' : 'b3e6d88f1b9a55f2be62daccd7f2ba73',
+    'format' : 'iframe',
+    'height' : 250,
+    'width' : 300,
+    'params' : {}
+  };
+</script>
+<script src="https://bauval.org/22/b3e6d88f1b9a55f2be62daccd7f2ba73"></script></div>
     </aside>
   </div>
 </div>
